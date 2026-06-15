@@ -3,3 +3,4 @@ Makefile
 resources/
 nocturne
 nocturne_debug
+.DS_Store
