@@ -1,0 +1,5 @@
+.clangd
+Makefile
+resources/
+nocturne
+nocturne_debug
