@@ -18,6 +18,7 @@ After nocturne scans through folders and files in a directory you can scroll thr
 |-------------|-----------------------------|
 | a / enter   | Play hovered music file     |
 | tab         | Exit music file             |
+| q           | Quit the application        |
 | j           | Move down in main menu      |
 | k           | Move up in main menu        |
 | p           | Pause/ unpause music        |

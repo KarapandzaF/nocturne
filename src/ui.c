@@ -88,9 +88,9 @@ void draw_ui(App *app){
 	//render selected track + info
 	Track *track = &app -> tracks.items[app -> selected];
 	render_text(app -> stdplane, NCSTYLE_ITALIC, 0xFFFFFF, app -> selected + 1, 4,  track -> title);
-	render_text(app -> stdplane, NCSTYLE_BOLD, 0xFFFFFF, 20, (artcols * 2 - 21), track -> title);
-	render_text(app -> stdplane, NCSTYLE_NONE, 0xFFFFFF, 21, (artcols * 2 - 21), track -> artist);
-	render_text(app -> stdplane, NCSTYLE_ITALIC, 0xFFFFFF, 22, (artcols * 2 - 21), track -> album);
+	render_text(app -> stdplane, NCSTYLE_BOLD, 0xFFFFFF, artrows + 2, 51, track -> title);
+	render_text(app -> stdplane, NCSTYLE_NONE, 0xFFFFFF, artrows + 3, 51, track -> artist);
+	render_text(app -> stdplane, NCSTYLE_ITALIC, 0xFFFFFF, artrows + 4, 51, track -> album);
 
 
 	destroy_format(app -> stdplane);
