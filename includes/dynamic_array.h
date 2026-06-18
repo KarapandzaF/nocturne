@@ -1,31 +1,54 @@
 #ifndef DARRAY_H
 #define DARRAY_H
-
-#include <stdint.h>
 #include <stdlib.h>
-#include "track.h"
+#include <stdint.h>
 
 typedef int8_t i8;
 typedef int16_t i16;
 typedef int32_t i32;
 typedef int64_t i64;
-typedef uint8_t ui8;
-typedef uint16_t ui16;
-typedef uint32_t ui32;
-typedef uint64_t ui64;
+typedef uint8_t u8;
+typedef uint32_t u32;
+typedef uint64_t u64;
 
-typedef float f32;
-typedef double f64;
-
-typedef struct track_array {
-   Track *items;
-   i32 count;
-   i32 size;
-} array_t;
-
-array_t create_array(size_t size);
-void delete_array(array_t *array);
-static void push_item(array_t *array, Track item);
-void append(array_t *array, Track item);
+#define DEFINE_ARRAY(T) \
+typedef struct { \
+   T *items; \
+   int count; \
+   int size; \
+} T##_array_t; \
+\
+static inline T##_array_t T##_create_array(size_t size) { \
+    T##_array_t array; \
+    array.items = malloc(sizeof(T) * size); \
+    array.count = 0; \
+    array.size = size; \
+    return array; \
+} \
+\
+static inline void T##_delete_array(T##_array_t *array) { \
+    free(array->items); \
+    array->items = NULL; \
+    array->count = 0; \
+    array->size = 0; \
+} \
+\
+static inline void T##_push_item(T##_array_t *array, T item) { \
+    array->items[array->count] = item; \
+    array->count++; \
+} \
+\
+static inline void T##_append(T##_array_t *array, T item) { \
+    if ((array->count + 1) < array->size) { \
+        T##_push_item(array, item); \
+    } else { \
+        T *tmp = realloc(array->items, sizeof(T) * array->size * 2); \
+        if (tmp != NULL) { \
+            array->items = tmp; \
+            array->size *= 2; \
+            T##_push_item(array, item); \
+        } \
+    } \
+}
 
 #endif 

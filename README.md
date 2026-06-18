@@ -17,6 +17,7 @@ After nocturne scans through folders and files in a directory you can scroll thr
 | Key         | Action                      |
 |-------------|-----------------------------|
 | a / enter   | Play hovered music file     |
+| s           | Shuffle songs               |
 | tab         | Exit music file             |
 | q           | Quit the application        |
 | j           | Move down in main menu      |

@@ -13,7 +13,6 @@
 #include <taglib/tag_c.h>
 #include <unistd.h>
 #include <locale.h>
-#include "dynamic_array.h"
 #include "config.h"
 #include "audio.h"
 #include "track.h"
@@ -28,17 +27,19 @@ typedef uint64_t u64;
 
 #define FILEND(a) (strstr(entry -> d_name, a))
 
+
 typedef struct{
     struct notcurses *nc;
     struct ncplane *stdplane;
 
     Audio audio;
     
-    array_t tracks;
-    array_t shuffle_queue;
+    Track_array_t tracks;
+    i32_array_t shuffle_queue;
 
     i32 selected;
     i32 last_selected;
+    i32 shuffle_count;
 
     f32 cursor;
     f32 length;
@@ -53,6 +54,7 @@ typedef struct{
     bool needs_blit;
     bool playing;
     bool audio_lock;
+    bool shuffled;
     bool running;
 
     Config config;
@@ -63,7 +65,7 @@ void app_run(App *app);
 void app_cleanup(App *app);
 void app_play(App *app);
 static void app_queue(App *app, i32 *array, size_t array_s);
-static void app_shuffle(App *app);
+static void generate_shuffle(App *app);
 
 static void *input_loop(void *arg);
 void input_prompt(App *app, char *out, size_t size);

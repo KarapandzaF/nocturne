@@ -1,5 +1,6 @@
 #include "../includes/app.h"
 #include "../includes/ui.h"
+#include <stdbool.h>
 
 i32 app_init(App *app){
 
@@ -34,7 +35,7 @@ i32 app_init(App *app){
 
     app -> running = 1;
 
-    app -> tracks = create_array(10);
+    app -> tracks = Track_create_array(10);
 
 
     return 1;
@@ -94,7 +95,7 @@ void app_run(App *app){
 void app_cleanup(App *app){
 
     audio_cleanup(&app -> audio);
-    delete_array(&app -> tracks);
+    Track_delete_array(&app -> tracks);
     notcurses_stop(app->nc);
 
 }
@@ -138,6 +139,8 @@ void input_handle(App *app){
 	    app -> needs_blit = true;
 	    app -> playing = false;
 	    app -> audio_lock = false;
+	    app -> shuffled = false;
+	    memset(&app -> shuffle_queue, 0, sizeof(i32_array_t));
 	    pthread_mutex_unlock(&app -> mutex);
 	    audio_stop(&app -> audio);
 	    break;
@@ -150,6 +153,9 @@ void input_handle(App *app){
 	case 'p':
 	    audio_pause(&app -> audio);
 	    break;
+	case 's':
+	    app -> shuffled = true;
+	    app -> playing = true;
 	case '=':
 	    audio_change_volume(&app -> audio, 1);
 	    break;
@@ -234,7 +240,7 @@ static void scan_music(App *app, const char *directory){
 	    track.album[0] = '\0';
 	}
 
-	append(&app -> tracks, track);
+	Track_append(&app -> tracks, track);
 
 	taglib_free(file);
     }
@@ -244,19 +250,54 @@ static void scan_music(App *app, const char *directory){
 }
 
 void app_play(App *app){
+    bool track_ended = ma_sound_at_end(&app->audio.sound);
 
-    if(app -> playing == true && app -> audio_lock == false){
-	app -> needs_blit = true;
-	Track *track = &app -> tracks.items[app -> selected];
-	audio_play(&app ->audio, track -> path);
+    if(app->playing == false){ return; }
 
-	app -> audio_lock = true;
-    }else if(app -> playing == true && ma_sound_at_end(&app -> audio.sound)){
-	ma_sound_uninit(&app -> audio.sound);
-	if(app -> selected < app -> tracks.count - 1){ app -> selected++; }
-	else { app -> selected = 0; }
-	app -> audio_lock = false;
+    if(app->audio_lock == false){
+	if(app->shuffled && app->shuffle_queue.items == NULL){
+	    generate_shuffle(app);
+	}
+	if(app->shuffled){
+	    app->selected = app->shuffle_queue.items[app->shuffle_count];
+	}
+
+	app->needs_blit = true;
+	Track *track = &app->tracks.items[app->selected];
+	audio_play(&app->audio, track->path);
+	app->audio_lock = true;
+
+    } else if(track_ended){
+	ma_sound_uninit(&app->audio.sound);
+	app->audio_lock = false;
+
+	if(app->shuffled){
+	    app->shuffle_count++;
+	} else if(app->selected < app->tracks.count - 1){
+	    app->selected++;
+	} else {
+	    app->selected = 0;
+	}
     }
+}
+
+
+static void generate_shuffle(App *app){
+    i32 n, k, temp;
+
+    app -> shuffle_queue = i32_create_array(app -> tracks.count);
+    for(i32 i = 0; i < app -> tracks.count; i++){
+	i32_append(&app -> shuffle_queue, i);
+    }
+
+    srand((unsigned int)time(NULL));
+    for(n = app -> shuffle_queue.count - 1; n > 0; n--){
+	k = rand() % (n + 1);
+	temp = app -> shuffle_queue.items[n];
+	app -> shuffle_queue.items[n] = app -> shuffle_queue.items[k];
+	app -> shuffle_queue.items[k] = temp;
+    }
+    app -> shuffle_count = 0;
 }
 
 void input_prompt(App *app, char *out, size_t out_size){

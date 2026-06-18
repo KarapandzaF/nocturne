@@ -1,6 +1,7 @@
 .clangd
 Makefile
 resources/
+build
 nocturne
 nocturne_debug
 .DS_Store

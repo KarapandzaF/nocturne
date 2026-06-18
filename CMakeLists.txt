@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(music_tui C)
+project(nocturne C)
 
 set(CMAKE_C_STANDARD 11)
 
@@ -9,24 +9,25 @@ pkg_check_modules(TAGLIB REQUIRED IMPORTED_TARGET taglib_c)
 
 include_directories(includes)
 
-add_executable(music_tui
+add_executable(nocturne
         src/main.c
         src/app.c
         src/audio.c
+	src/config.c
         src/miniaudio.c
-	src/dynamic_array.c
+	src/ui.c
 )
 
-target_include_directories(music_tui PRIVATE includes)
+target_include_directories(nocturne PRIVATE includes)
 
-target_link_libraries(music_tui PRIVATE
+target_link_libraries(nocturne PRIVATE
         PkgConfig::NOTCURSES
         PkgConfig::TAGLIB
         m
 )
 
 if (APPLE)
-    target_link_libraries(music_tui PRIVATE
+    target_link_libraries(nocturne PRIVATE
             "-framework CoreAudio"
             "-framework AudioToolbox"
             "-framework AudioUnit"
@@ -35,5 +36,5 @@ if (APPLE)
 endif ()
 
 if (UNIX AND NOT APPLE)
-    target_link_libraries(music_tui PRIVATE pthread dl)
+    target_link_libraries(nocturne PRIVATE pthread dl)
 endif ()
